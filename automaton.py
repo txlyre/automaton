@@ -37,7 +37,16 @@ class SlavesGame:
     
     self.application_url, self.authorization_data = self.get_auth_data()
 
+    self.mobile_iframe_url = f"{self.application_url}?{self.authorization_data}"
+
     self.application_url = self.application_url[:-11]
+
+    self.headers = {
+      "Authorization": f"Bearer {self.authorization_data}",
+      "User-Agent": "Mozilla/5.0 (Linux; arm_64; Android 10; MIX 2S) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.182 Mobile Safari/537.36",
+      "Referer": self.mobile_iframe_url,
+      "Origin": self.application_url,
+    }
 
   def auth(self, login, password):
     url = f"https://oauth.vk.com/token?grant_type=password&client_id=2274003&client_secret=hHbZxrka2uZ6jB1inYsH&username={login}&password={password}"
@@ -56,14 +65,14 @@ class SlavesGame:
   def get(self, data):
     url = f"{self.GAME_SERVER_URL}/{data}"
 
-    response = requests.get(url, headers={"Authorization": f"Bearer {self.authorization_data}", "User-Agent": "Dont ban plz ;3"}).json()
+    response = requests.get(url, headers=self.headers).json()
 
     return response
 
   def post(self, method, data={}):
     url = f"{self.GAME_SERVER_URL}/{method}"
 
-    response = requests.post(url, json=data, headers={"Authorization": f"Bearer {self.authorization_data}", "User-Agent": "Dont ban plz ;3"}).json()
+    response = requests.post(url, json=data, headers=self.headers).json()
 
     return response
 
