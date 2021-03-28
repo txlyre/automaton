@@ -370,8 +370,6 @@ else:
 try:
   automaton = Automaton(credentials)
 except:
-  import traceback
-  traceback.print_exc()
   logging.error("Failed to perform authorization.")
 
   sys.exit(1)
