@@ -1,6 +1,7 @@
 import os.path
 import sys
 import enum
+import json
 import time
 import random
 import getpass
@@ -112,6 +113,22 @@ class Automaton:
     self.attempts = 3
 
     self.job = "Ave SPAM!"
+
+    if os.path.isfile("./config.json"):
+      logging.info("Found `config.json` file. Loading settings...")
+
+      try:
+        with open("./config.json", "r") as config_file:
+          config = json.load(config_file)
+
+          self.interval = int(config["interval"])
+          self.cooldown = float(config["cooldown"])
+          self.attempts = int(config["attempts"])
+          self.job = str(config["job"])
+
+        logging.info("Loaded settings from `config.json`!")
+      except:
+        logging.error("Can't load `config.json`. Reverting to default settings!")
 
   @property
   def is_busy(self):

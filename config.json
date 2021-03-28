@@ -1,0 +1,6 @@
+{
+  "interval": 30,
+  "cooldown": 1.5,
+  "attempts": 3,
+  "job": "Ave SPAM!"
+}
