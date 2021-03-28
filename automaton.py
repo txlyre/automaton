@@ -151,6 +151,12 @@ class Automaton:
     offset = 0
     while offset < self.max_ids:
       response = requests.get(f"https://api.vk.com/method/friends.get?user_id={id}&offset={offset if offset != 0 else 1}&order=random&access_token={self.game.access_token}&v=5.130").json()
+
+      if "error" in response:
+        logging.error(response["error"]["error_msg"])
+
+        break
+
       items = response["response"]["items"]
       ids.extend(items)
 
@@ -162,6 +168,12 @@ class Automaton:
     offset = 0
     while offset < self.max_ids:
       response = requests.get(f"https://api.vk.com/method/users.getFollowers?user_id={id}&offset={offset if offset != 0 else 1}&count=1000&access_token={self.game.access_token}&v=5.130").json()
+     
+      if "error" in response:
+        logging.error(response["error"]["error_msg"])
+
+        break
+
       items = response["response"]["items"]
       ids.extend(items)
 
