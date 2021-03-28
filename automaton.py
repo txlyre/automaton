@@ -368,6 +368,9 @@ class Automaton:
         self.chain(id)         
 
       self.busy.clear()
+
+print("Automaton | made by @txlyre, www: txlyre.website")
+print("GitHub: github.com/txlyre/automaton\n\n")
  
 logging.info("Authorization!")
      
