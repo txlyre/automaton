@@ -120,6 +120,7 @@ class Automaton:
     self.interval = 30
     self.cooldown = 1.5
     self.attempts = 3
+    self.max_ids = 25000
 
     self.job = "Ave SPAM!"
 
@@ -133,6 +134,7 @@ class Automaton:
           self.interval = int(config["interval"])
           self.cooldown = float(config["cooldown"])
           self.attempts = int(config["attempts"])
+          self.max_ids = int(config["max_ids"])
           self.job = str(config["job"])
 
         logging.info("Loaded settings from `config.json`!")
@@ -143,14 +145,14 @@ class Automaton:
   def is_busy(self):
     return self.busy.is_set()
      
-  def fetch_ids(self):
-    logging.info("Fetching some ids...")
-    
+  def get_friends(self, id):
+    ids = []
+
     offset = 0
-    while True:
-      response = requests.get(f"https://api.vk.com/method/friends.get?offset={offset if offset != 0 else 1}&order=random&access_token={self.game.access_token}&v=5.130").json()
+    while offset < self.max_ids:
+      response = requests.get(f"https://api.vk.com/method/friends.get?user_id={id}&offset={offset if offset != 0 else 1}&order=random&access_token={self.game.access_token}&v=5.130").json()
       items = response["response"]["items"]
-      self.ids.extend(items)
+      ids.extend(items)
 
       if len(items) < 5000:
         break
@@ -158,26 +160,35 @@ class Automaton:
       offset += 5000
 
     offset = 0
-    while True:
-      response = requests.get(f"https://api.vk.com/method/users.getFollowers?offset={offset if offset != 0 else 1}&count=1000&access_token={self.game.access_token}&v=5.130").json()
+    while offset < self.max_ids:
+      response = requests.get(f"https://api.vk.com/method/users.getFollowers?user_id={id}&offset={offset if offset != 0 else 1}&count=1000&access_token={self.game.access_token}&v=5.130").json()
       items = response["response"]["items"]
-      self.ids.extend(items)
+      ids.extend(items)
 
       if len(items) < 1000:
         break
 
       offset += 1000
 
-    offset = 0
-    while True:
-      response = requests.get(f"https://api.vk.com/method/groups.get?offset={offset if offset != 0 else 1}&extended=0&count=1000&access_token={self.game.access_token}&v=5.130").json()
-      items = response["response"]["items"]
-      self.ids.extend(items)
+    return ids
 
-      if len(items) < 1000:
-        break
+  def fetch_ids(self):
+    logging.info("Fetching some ids...")
+    
+    ids = self.get_friends(self.my_id)
+    self.ids.extend(ids)
 
-      offset += 1000
+    for id in ids:
+      if id == self.my_id:
+        continue
+
+      if len(self.ids) >= self.max_ids:
+        break    
+
+      new_ids = self.get_friends(id)
+      self.ids.extend(new_ids)
+
+      logging.info(f"{len(self.ids)} (max. {self.max_ids}) id(s) fetched!")
    
     logging.info(f"Fetched {len(self.ids)} id(s).")
 
